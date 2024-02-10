@@ -45,7 +45,7 @@ func Extrato(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func buscarExtratoDoCliente(db *sql.DB, id int64) (*[]types.TbTransacao, error) {
+func buscarExtratoDoCliente(db *sql.DB, id int8) (*[]types.TbTransacao, error) {
 
 	rows, err := db.Query(database.Q_EXTRATO, id)
 
@@ -54,7 +54,7 @@ func buscarExtratoDoCliente(db *sql.DB, id int64) (*[]types.TbTransacao, error) 
 	}
 	defer rows.Close()
 
-	transacoes := []types.TbTransacao{}
+	transacoes := make([]types.TbTransacao, 10)
 
 	for rows.Next() {
 		transacao := types.TbTransacao{}

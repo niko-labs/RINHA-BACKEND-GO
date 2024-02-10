@@ -64,7 +64,7 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func debitar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
+func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
 	// Transforma o valor da transação em centavos
 	valor := helpers.TransformarEmCentavos(transacao.Valor)
 
@@ -97,7 +97,7 @@ func debitar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.Tr
 	return &cliente.Saldo, nil
 }
 
-func creditar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
+func creditar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
 
 	// Transforma o valor da transação em centavos
 	valor := helpers.TransformarEmCentavos(transacao.Valor)
@@ -125,7 +125,7 @@ func creditar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.T
 	return &cliente.Saldo, nil
 }
 
-func buscaInfoDoCliente(db *sql.DB, id int64) (*types.TbCliente, error) {
+func buscaInfoDoCliente(db *sql.DB, id int8) (*types.TbCliente, error) {
 
 	rows, err := db.Query(database.Q_CLIENTE, id)
 	if err != nil {

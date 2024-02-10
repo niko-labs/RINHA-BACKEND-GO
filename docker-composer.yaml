@@ -63,37 +63,4 @@ services:
           memory: '16MB'
     ports:
       - "9999:9999"
-    # network_mode: "host"
-    # extra_hosts:
-    #   - "api01:0.0.0.0"
-    #   - "api02:0.0.0.0"
     
-
-  pgbouncer:
-    image: docker.io/bitnami/pgbouncer:1
-    hostname: pgbouncer
-    depends_on:
-      - database
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: '16MB'
-    ports:
-      - "6432:6432" 
-    environment:
-      - POSTGRESQL_HOST=database
-      - POSTGRESQL_PASSWORD=rinha
-      - POSTGRESQL_USERNAME=rinha
-      - PGBOUNCER_DATABASE=*
-      - PGBOUNCER_TRANSACTION_POOL_SIZE=300
-      - PGBOUNCER_MAX_CLIENT_CONN=300
-      - PGBOUNCER_DEFAULT_POOL_SIZE=200
-      - PGBOUNCER_MIN_POOL_SIZE=150
-      # - PGBOUNCER_RESERVE_POOL_SIZE=5
-      # - PGBOUNCER_RESERVE_POOL_TIMEOUT=5
-      # - PGBOUNCER_SERVER_IDLE_TIMEOUT=240
-      # - PGBOUNCER_SERVER_RESET_QUERY=DISCARD ALL
-      # # transaction type: session, statement, transaction
-      - PGBOUNCER_POOL_MODE=transaction
-      
