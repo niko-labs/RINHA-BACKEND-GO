@@ -41,8 +41,7 @@ func Extrato(w http.ResponseWriter, r *http.Request) {
 
 func buscarExtratoDoCliente(db *sql.DB, id int64) (*[]types.TbTransacao, error) {
 
-	STMT := "SELECT valor, tipo, descricao, realizada_em FROM transacoes WHERE cliente_id = $1 ORDER BY realizada_em DESC LIMIT 10;"
-	rows, err := db.Query(STMT, id)
+	rows, err := db.Query(database.Q_EXTRATO, id)
 
 	if err != nil {
 		return nil, err

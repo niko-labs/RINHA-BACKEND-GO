@@ -7,4 +7,7 @@ const (
 
 	// CREDITO - DEBITO
 	CD_STMT_UPDATE = "UPDATE clientes SET saldo = $1 WHERE id = $2;"
+
+	//
+	Q_EXTRATO = "SELECT valor, tipo, descricao, realizada_em FROM transacoes WHERE cliente_id = $1 ORDER BY realizada_em DESC LIMIT 10;"
 )
