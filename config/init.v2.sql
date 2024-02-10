@@ -17,13 +17,6 @@ BEGIN
 	    ('Shinji', 800 * 100, 0),
 	    ('Fern', 10000 * 100, 0),
 	    ('Frienren', 100000 * 100, 0);
-	-- ADICIONA TRANSACAO INICIAL PARA CADA CLIENTE
-	INSERT INTO
-	    transacoes (
-	        cliente_id, valor, tipo, descricao, realizada_em
-	    )
-	SELECT id, limite, 'c', 'INIT', NOW()
-	FROM clientes;
 END;
 $$; 
 

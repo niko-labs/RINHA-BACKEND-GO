@@ -65,11 +65,9 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 }
 
 func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
-	// Transforma o valor da transação em centavos
-	valor := helpers.TransformarEmCentavos(transacao.Valor)
 
 	// Atualiza o saldo do cliente
-	cliente.Saldo -= valor
+	cliente.Saldo -= transacao.Valor
 
 	// Verifica se o saldo do cliente é menor que o limite
 	if cliente.Saldo < -cliente.Limite {
@@ -84,7 +82,7 @@ func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.Tra
 
 	// Executa STMT_UPDATE e STMT_INSERT
 	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(database.TD_STMT_INSERT, id, valor, transacao.Descricao)
+	tx.Exec(database.TD_STMT_INSERT, id, transacao.Valor, transacao.Descricao)
 
 	// Commita a transação
 	err = tx.Commit()
@@ -99,11 +97,8 @@ func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.Tra
 
 func creditar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
 
-	// Transforma o valor da transação em centavos
-	valor := helpers.TransformarEmCentavos(transacao.Valor)
-
 	// Atualiza o saldo do cliente
-	cliente.Saldo += valor
+	cliente.Saldo += transacao.Valor
 
 	// Inicia Transação
 	tx, err := db.Begin()
@@ -113,7 +108,7 @@ func creditar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.Tr
 
 	// Executa STMT_UPDATE e STMT_INSERT
 	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(database.TC_STMT_INSERT, id, valor, transacao.Descricao)
+	tx.Exec(database.TC_STMT_INSERT, id, transacao.Valor, transacao.Descricao)
 
 	// Commita a transação
 	err = tx.Commit()

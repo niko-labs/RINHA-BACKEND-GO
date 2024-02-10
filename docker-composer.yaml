@@ -2,8 +2,9 @@ version: '3.9'
 
 services:
   api01: &api
-    # image: nicolasmmb/a-go-rinha:latest
-    build: .
+    container_name: server-api-01
+    image: nicolasmmb/a-go-rinha:latest
+    # build: .
     depends_on:
       database: 
           condition: service_healthy
@@ -22,10 +23,12 @@ services:
       DB_NAME: rinha
 
   api02:
+    container_name: server-api-02
     <<: *api
 
 
   database:
+    container_name: server-database
     image: postgres
     hostname: database
     command: postgres -c config_file=/docker-entrypoint-initdb.d/postgresql.conf
@@ -47,8 +50,11 @@ services:
       POSTGRES_DB: rinha
       POSTGRES_USER: rinha
       POSTGRES_PASSWORD: rinha
+    ports:
+      - "5432:5432"
 
   nginx: 
+    container_name: server-nginx
     image: nginx:latest
     volumes:
       - ./config/nginx.conf:/etc/nginx/nginx.conf:ro

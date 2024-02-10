@@ -54,7 +54,7 @@ func buscarExtratoDoCliente(db *sql.DB, id int8) (*[]types.TbTransacao, error) {
 	}
 	defer rows.Close()
 
-	transacoes := make([]types.TbTransacao, 10)
+	transacoes := []types.TbTransacao{}
 
 	for rows.Next() {
 		transacao := types.TbTransacao{}
