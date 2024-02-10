@@ -33,7 +33,7 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 
 	db := database.PegarConexao()
 
-	cliente, err := vericarSeClienteExiste(db, id)
+	cliente, err := buscaInfoDoCliente(db, id)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -125,10 +125,9 @@ func creditar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.T
 	return &cliente.Saldo, nil
 }
 
-func vericarSeClienteExiste(db *sql.DB, id int64) (*types.TbCliente, error) {
+func buscaInfoDoCliente(db *sql.DB, id int64) (*types.TbCliente, error) {
 
-	STMT := "SELECT id, limite, saldo FROM clientes WHERE id = $1 LIMIT 1"
-	rows, err := db.Query(STMT, id)
+	rows, err := db.Query(database.Q_CLIENTE, id)
 	if err != nil {
 		return nil, err
 	}
@@ -141,9 +140,9 @@ func vericarSeClienteExiste(db *sql.DB, id int64) (*types.TbCliente, error) {
 	if err != nil {
 		return nil, err
 	}
-	if cliente.Id == 0 {
-		return nil, errors.New("Cliente não encontrado")
-	}
+	// if cliente.Id == 0 {
+	// 	return nil, errors.New("Cliente não encontrado")
+	// }
 
 	return &cliente, nil
 }

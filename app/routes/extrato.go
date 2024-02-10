@@ -17,9 +17,15 @@ func Extrato(w http.ResponseWriter, r *http.Request) {
 
 	id := helpers.PegaIdDoPathValue(r)
 
+	idValido := helpers.VerificaSeIdEstaEntreUmOuCinco(id)
+	if !idValido {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	db := database.PegarConexao()
 
-	cliente, err := vericarSeClienteExiste(db, id)
+	cliente, err := buscaInfoDoCliente(db, id)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
