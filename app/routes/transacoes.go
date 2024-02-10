@@ -16,10 +16,6 @@ const ROTA_TRANSACOES = "POST /clientes/{id}/transacoes"
 // curl -X POST http://localhost:9999/clientes/1/transacoes -d '{"tipo": "d", "valor": 100, "descricao": "Agua"}' -v
 // curl -X POST http://localhost:9999/clientes/1/transacoes -d '{"tipo": "c", "valor": 100, "descricao": "Salario"}' -v
 
-// if (data.valor < 0 || parseInt(data.valor) != data.valor) return { code: 422, data: null }
-// if (!['c', 'd'].includes(data.tipo)) return { code: 422, data: null }
-// if (!data.descricao || data.descricao.length === 0 || data.descricao.length > 10) return { code: 422, data: null }
-
 func Transacoes(w http.ResponseWriter, r *http.Request) {
 
 	id := helpers.PegaIdDoPathValue(r)
