@@ -77,8 +77,6 @@ func debitar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.Tr
 	}
 
 	// TODO: MOVER PARA `CONSTS`
-	STMT_UPDATE := "UPDATE clientes SET saldo = $1 WHERE id = $2;"
-	STMT_INSERT := "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, 'd', $3);"
 
 	// Inicia Transação
 	tx, err := db.Begin()
@@ -87,8 +85,8 @@ func debitar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.Tr
 	}
 
 	// Executa STMT_UPDATE e STMT_INSERT
-	tx.Exec(STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(STMT_INSERT, id, valor, transacao.Descricao)
+	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
+	tx.Exec(database.TD_STMT_INSERT, id, valor, transacao.Descricao)
 
 	// Commita a transação
 	err = tx.Commit()
@@ -109,9 +107,6 @@ func creditar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.T
 	// Atualiza o saldo do cliente
 	cliente.Saldo += valor
 
-	STMT_UPDATE := "UPDATE clientes SET saldo = $1 WHERE id = $2;"
-	STMT_INSERT := "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, 'c', $3);"
-
 	// Inicia Transação
 	tx, err := db.Begin()
 	if err != nil {
@@ -119,8 +114,8 @@ func creditar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.T
 	}
 
 	// Executa STMT_UPDATE e STMT_INSERT
-	tx.Exec(STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(STMT_INSERT, id, valor, transacao.Descricao)
+	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
+	tx.Exec(database.TC_STMT_INSERT, id, valor, transacao.Descricao)
 
 	// Commita a transação
 	err = tx.Commit()
