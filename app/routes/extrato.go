@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"encoding/json"
 
 	"net/http"
 	"rinha-backend-2024-q1/database"
@@ -40,7 +39,7 @@ func Extrato(w http.ResponseWriter, r *http.Request) {
 	exSaldo := types.ExtratoSaldo{Total: cliente.Saldo, Limite: cliente.Limite, DataExtrato: time.Now()}
 	extrato := types.ExtratoOutput[types.TbTransacao]{Saldo: exSaldo, Transacoes: *transacoes}
 
-	_json, _ := json.Marshal(extrato)
+	_json, _ := helpers.Json.Marshal(extrato)
 	w.Write(_json)
 
 }

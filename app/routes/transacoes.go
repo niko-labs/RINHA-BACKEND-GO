@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -23,7 +22,7 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dadosTransacao := &types.TransacaoInput{}
-	err = json.Unmarshal(body, dadosTransacao)
+	err = helpers.Json.Unmarshal(body, dadosTransacao)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
@@ -55,7 +54,7 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response := types.TransacaoOutput{Limite: cliente.Limite, Saldo: *saldo}
-		_json, _ := json.Marshal(response)
+		_json, _ := helpers.Json.Marshal(response)
 		w.Write(_json)
 		return
 	}
@@ -65,7 +64,7 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 		}
 		response := types.TransacaoOutput{Limite: cliente.Limite, Saldo: *saldo}
-		_json, _ := json.Marshal(response)
+		_json, _ := helpers.Json.Marshal(response)
 		w.Write(_json)
 		return
 	}
