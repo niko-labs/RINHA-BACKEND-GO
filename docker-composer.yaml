@@ -3,15 +3,15 @@ version: '3.9'
 services:
   api01: &api
     container_name: server-api-01
-    image: nicolasmmb/a-go-rinha:latest
-    # build: .
+    # image: nicolasmmb/a-go-rinha:latest
+    build: .
     depends_on:
       database: 
           condition: service_healthy
     deploy:
       resources:
         limits:
-          cpus: '0.175'
+          cpus: '0.2'
           memory: '32MB'
     environment:
       SERVER_PORT: 9999
@@ -44,8 +44,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: '450MB'
+          cpus: '0.9'
+          memory: '386MB'
     environment:
       POSTGRES_DB: rinha
       POSTGRES_USER: rinha
@@ -65,7 +65,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.15'
+          cpus: '0.2'
           memory: '16MB'
     ports:
       - "9999:9999"
