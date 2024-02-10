@@ -17,16 +17,24 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 
 	id := helpers.PegaIdDoPathValue(r)
 
-	body, _ := io.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
 	dadosTransacao := &types.TransacaoInput{}
-	json.Unmarshal(body, dadosTransacao)
+	err = json.Unmarshal(body, dadosTransacao)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
 
 	if dadosTransacao.Tipo != "c" && dadosTransacao.Tipo != "d" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 
-	if len(dadosTransacao.Descricao) == 0 || len(dadosTransacao.Descricao) > 10 {
+	if len(dadosTransacao.Descricao) == 0 || len(dadosTransacao.Descricao) > 10 || dadosTransacao.Descricao == "" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
@@ -63,6 +71,18 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+// func verificaCorpoDaRequisicao(transacao *types.TransacaoInput) error {
+// 	if transacao.Tipo != "c" && transacao.Tipo != "d" {
+// 		return errors.New("Tipo de transação inválido")
+// 	}
+
+// 	if len(*transacao.Descricao) == 0 || len(*transacao.Descricao) > 10 || transacao.Descricao == nil || *transacao.Descricao == "" {
+// 		return errors.New("Descrição inválida")
+// 	}
+
+// 	return nil
+// }
 
 func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
 
