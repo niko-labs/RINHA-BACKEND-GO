@@ -76,8 +76,6 @@ func debitar(db *sql.DB, id int64, cliente *types.TbCliente, transacao *types.Tr
 		return nil, errors.New("Saldo insuficiente")
 	}
 
-	// TODO: MOVER PARA `CONSTS`
-
 	// Inicia Transação
 	tx, err := db.Begin()
 	if err != nil {
