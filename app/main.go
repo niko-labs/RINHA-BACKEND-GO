@@ -10,17 +10,17 @@ import (
 )
 
 func init() {
+	log.Println("Carregando Ambiente")
 	helpers.LoadEnv()
 	database.ConectarAoPostgreSQL()
-
 }
 
 func main() {
-
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(routes.ROTA_TRANSACOES, routes.Transacoes)
 	mux.HandleFunc(routes.ROTA_EXTRATO, routes.Extrato)
+	mux.HandleFunc(routes.ROTA_PING, routes.Ping)
 
 	SERVER_ADDR := os.Getenv("SERVER_ADDR")
 	SERVER_PORT := os.Getenv("SERVER_PORT")

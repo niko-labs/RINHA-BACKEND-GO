@@ -25,6 +25,7 @@ FROM alpine:3.12.0 AS final
 
 # Set the Current Working Directory inside the container
 WORKDIR /_app
+RUN apk update && apk add --no-cache curl
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /_builder/bin/server /_app/_server
