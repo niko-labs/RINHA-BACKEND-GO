@@ -3,8 +3,9 @@ version: '3.9'
 services:
   api01: &api
     container_name: server-api-01
-    # image: nicolasmmb/a-go-rinha:latest-beta-arm
+    # image: nicolasmmb/a-go-rinha:latest
     build: .
+    # platform: linux/x86_64
     depends_on:
       database: 
           condition: service_healthy
@@ -14,15 +15,16 @@ services:
           cpus: '0.3'
           memory: '32MB'
     environment:
-      SERVER_PORT: 9999
+      SERVER_PORT: 9997
       SERVER_ADDR: 0.0.0.0
-      DB_HOST: database
+      DB_HOST: localhost
       DB_PORT: 5432
       DB_USER: rinha
       DB_PASS: rinha
       DB_NAME: rinha
+    network_mode: "host"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:9999/ping"]
+      test: ["CMD", "curl", "--fail", "http://localhost:9997/ping"]
       interval: 3s
       timeout: 500ms
       retries: 15
@@ -31,7 +33,20 @@ services:
   api02:
     container_name: server-api-02
     <<: *api
-
+    environment:
+      SERVER_PORT: 9998
+      SERVER_ADDR: 0.0.0.0
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: rinha
+      DB_PASS: rinha
+      DB_NAME: rinha
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:9998/ping"]
+      interval: 3s
+      timeout: 500ms
+      retries: 15
+      start_period: 1s
 
   database:
     container_name: server-database
@@ -58,6 +73,7 @@ services:
       POSTGRES_PASSWORD: rinha
     ports:
       - "5432:5432"
+    network_mode: "host"
 
   nginx: 
     container_name: server-nginx
@@ -76,6 +92,7 @@ services:
         limits:
           cpus: '0.35'
           memory: '32MB'
-    ports:
-      - "9999:9999"
+    network_mode: "host"
+    # ports:
+    #   - "9999:9999"
     
