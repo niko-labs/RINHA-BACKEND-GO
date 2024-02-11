@@ -18,3 +18,6 @@ composer-stop:
 	@docker-compose -f "docker-composer.yaml" down --remove-orphans
 
 composer-restart: composer-stop composer-start
+
+rodar-carga:
+	@./test/executar-teste-local.sh
