@@ -12,17 +12,22 @@ import (
 
 const ROTA_TRANSACOES = "POST /clientes/{id}/transacoes"
 
+var usuarios = map[int8]types.TbCliente{}
+
 func Transacoes(w http.ResponseWriter, r *http.Request) {
 
 	id := helpers.PegaIdDoPathValue(r)
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+	idValido := helpers.VerificaSeIdEstaEntreUmOuCinco(id)
+	if !idValido {
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	body, _ := io.ReadAll(r.Body)
+
 	dadosTransacao := &types.TransacaoInput{}
-	err = helpers.Json.Unmarshal(body, dadosTransacao)
+	err := helpers.Json.Unmarshal(body, dadosTransacao)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
