@@ -20,7 +20,6 @@ func Extrato(w http.ResponseWriter, r *http.Request) {
 
 	db := database.PegarConexao()
 
-	var dbJson string
 	rows, err := db.Query(database.Q_EXTRATO_CLIENTE, id)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -28,11 +27,11 @@ func Extrato(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
+	var dbJson string
 	for rows.Next() {
 		err = rows.Scan(&dbJson)
 	}
 
 	w.Write([]byte(dbJson))
 	return
-
 }

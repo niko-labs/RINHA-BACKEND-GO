@@ -12,8 +12,6 @@ import (
 
 const ROTA_TRANSACOES = "POST /clientes/{id}/transacoes"
 
-var usuarios = map[int8]types.TbCliente{}
-
 func Transacoes(w http.ResponseWriter, r *http.Request) {
 
 	id := helpers.PegaIdDoPathValue(r)
@@ -46,10 +44,6 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 	db := database.PegarConexao()
 
 	cliente, err := buscaInfoDoCliente(db, id)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
 
 	if dadosTransacao.Tipo == types.DEBITO {
 		saldo, err := debitar(db, id, cliente, dadosTransacao)
@@ -75,18 +69,6 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
-// func verificaCorpoDaRequisicao(transacao *types.TransacaoInput) error {
-// 	if transacao.Tipo != "c" && transacao.Tipo != "d" {
-// 		return errors.New("Tipo de transação inválido")
-// 	}
-
-// 	if len(*transacao.Descricao) == 0 || len(*transacao.Descricao) > 10 || transacao.Descricao == nil || *transacao.Descricao == "" {
-// 		return errors.New("Descrição inválida")
-// 	}
-
-// 	return nil
-// }
 
 func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
 
@@ -159,9 +141,6 @@ func buscaInfoDoCliente(db *sql.DB, id int8) (*types.TbCliente, error) {
 	if err != nil {
 		return nil, err
 	}
-	// if cliente.Id == 0 {
-	// 	return nil, errors.New("Cliente não encontrado")
-	// }
 
 	return &cliente, nil
 }
