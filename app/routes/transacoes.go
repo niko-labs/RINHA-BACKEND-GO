@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"errors"
 	"io"
 	"net/http"
 	"rinha-backend-2024-q1/database"
@@ -31,99 +30,42 @@ func Transacoes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if dadosTransacao.Tipo != "c" && dadosTransacao.Tipo != "d" {
-		w.WriteHeader(http.StatusUnprocessableEntity)
-		return
-	}
-
-	if len(dadosTransacao.Descricao) == 0 || len(dadosTransacao.Descricao) > 10 || dadosTransacao.Descricao == "" {
+	if !dadosTransacao.Validar() {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 
 	db := database.PegarConexao()
 
-	cliente, err := buscaInfoDoCliente(db, id)
-
-	if dadosTransacao.Tipo == types.DEBITO {
-		saldo, err := debitar(db, id, cliente, dadosTransacao)
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			return
-		}
-
-		response := types.TransacaoOutput{Limite: cliente.Limite, Saldo: *saldo}
-		_json, _ := helpers.Json.Marshal(response)
-		w.Write(_json)
-		return
-	}
-	if dadosTransacao.Tipo == types.CREDITO {
-		saldo, err := creditar(db, id, cliente, dadosTransacao)
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-		}
-		response := types.TransacaoOutput{Limite: cliente.Limite, Saldo: *saldo}
-		_json, _ := helpers.Json.Marshal(response)
-		w.Write(_json)
+	saldo, limite, err := executarTransacao(db, id, dadosTransacao)
+	if err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 
+	response := types.TransacaoOutput{Limite: *limite, Saldo: *saldo}
+	_json, _ := helpers.Json.Marshal(response)
+	w.Write(_json)
+	return
+
 }
 
-func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
-
-	// Atualiza o saldo do cliente
-	cliente.Saldo -= transacao.Valor
-
-	// Verifica se o saldo do cliente é menor que o limite
-	if cliente.Saldo < -cliente.Limite {
-		return nil, errors.New("Saldo insuficiente")
-	}
-
-	// Inicia Transação
+func executarTransacao(db *sql.DB, id int8, info *types.TransacaoInput) (saldo, limite *int64, err error) {
 	tx, err := db.Begin()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	// Executa STMT_UPDATE e STMT_INSERT
-	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(database.TD_STMT_INSERT, id, transacao.Valor, transacao.Descricao)
-
-	// Commita a transação
-	err = tx.Commit()
+	err = tx.QueryRow(database.T_DC_CTE_UNICO, id, info.Valor, info.Tipo, info.Descricao).Scan(&saldo, &limite)
 	if err != nil {
 		tx.Rollback()
-		return nil, err
+		return nil, nil, err
 	}
-
-	// Retorna o saldo do cliente
-	return &cliente.Saldo, nil
-}
-
-func creditar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
-
-	// Atualiza o saldo do cliente
-	cliente.Saldo += transacao.Valor
-
-	// Inicia Transação
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, err
-	}
-
-	// Executa STMT_UPDATE e STMT_INSERT
-	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(database.TC_STMT_INSERT, id, transacao.Valor, transacao.Descricao)
-
-	// Commita a transação
 	err = tx.Commit()
 	if err != nil {
-		tx.Rollback()
-		return nil, err
+		return nil, nil, err
 	}
-
-	return &cliente.Saldo, nil
+	return saldo, limite, err
 }
 
 func buscaInfoDoCliente(db *sql.DB, id int8) (*types.TbCliente, error) {

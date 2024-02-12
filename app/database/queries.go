@@ -1,15 +1,29 @@
 package database
 
 const (
+	T_DC_CTE_UNICO = `
+	WITH
+		cte_atualizar_saldo AS (
+			UPDATE clientes AS clt
+				SET saldo = CASE  
+						WHEN $3='c' THEN (saldo + $2)
+						WHEN $3='d' AND (saldo - $2) > -limite THEN (saldo - $2) 
+						
+						ELSE saldo
+					END
+			WHERE clt.id = $1
+			RETURNING saldo, limite
+		),
+		cte_inserir_transacao AS (
+			INSERT INTO transacoes (cliente_id, valor, tipo, descricao)
+			VALUES ($1, $2, $3, $4)
+		)
+	SELECT * FROM cte_atualizar_saldo;
+	`
+
 	// TRANSACOES
-	TD_STMT_INSERT = "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, 'd', $3);"
-	TC_STMT_INSERT = "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, 'c', $3);"
-
-	// CREDITO - DEBITO
-	CD_STMT_UPDATE = "UPDATE clientes SET saldo = $1 WHERE id = $2;"
-
-	// EXTRATO - CONSULTA
-	Q_EXTRATO = "SELECT valor, tipo, descricao, realizada_em FROM transacoes WHERE cliente_id = $1 ORDER BY realizada_em DESC LIMIT 10;"
+	T_DC_INSERT = "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, 'd', $3);"
+	T_DC_UPDATE = "UPDATE clientes SET saldo = $1 WHERE id = $2;"
 
 	// CLIENTE - CONSULTA
 	Q_CLIENTE = "SELECT id, limite, saldo FROM clientes WHERE id = $1 LIMIT 1"
@@ -46,18 +60,17 @@ const (
 				CASE
 					WHEN COUNT(ultimas_transacoes_cte) = 0 THEN '[]'
 				ELSE
-				jsonb_agg(
-					jsonb_build_object(
-						'valor', ultimas_transacoes_cte.valor,
-						'tipo', ultimas_transacoes_cte.tipo,
-						'descricao', ultimas_transacoes_cte.descricao,
-						'realizada_em', ultimas_transacoes_cte.realizada_em
+					jsonb_agg(
+						jsonb_build_object(
+							'valor', ultimas_transacoes_cte.valor,
+							'tipo', ultimas_transacoes_cte.tipo,
+							'descricao', ultimas_transacoes_cte.descricao,
+							'realizada_em', ultimas_transacoes_cte.realizada_em
+						)
 					)
-				)
-			END
-		)
-		FROM
-			ultimas_transacoes_cte;
-  
+				END
+			)
+	FROM
+		ultimas_transacoes_cte;
 	`
 )
