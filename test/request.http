@@ -1,0 +1,46 @@
+@id=1
+
+# Request 0
+GET http://0.0.0.0:9999/ping
+###
+
+# EXTRATO
+GET http://localhost:9999/clientes/{{id}}/extrato
+###
+
+# VALIDA: FLOAT GERA ERRO
+POST http://0.0.0.0:9999/clientes/{{id}}/transacoes
+Content-Type: application/json
+
+{"valor": 1.2, "tipo": "d", "descricao": "devolve"}
+###
+
+# VALIDA: TIPO INVALIDO
+POST http://0.0.0.0:9999/clientes/{{id}}/transacoes
+Content-Type: application/json
+
+{"valor": 1, "tipo": "x", "descricao": "devolve"}
+###
+
+
+# VALIDA: DESCRICAO GRADE DE MAIS
+POST http://0.0.0.0:9999/clientes/{{id}}/transacoes
+Content-Type: application/json
+
+{"valor": 1, "tipo": "c", "descricao": "123456789 e mais um pouco"}
+###
+
+# VALIDA: DESCRICAO VAZIA
+POST http://0.0.0.0:9999/clientes/{{id}}/transacoes
+Content-Type: application/json
+
+{"valor": 1, "tipo": "c", "descricao": ""}
+###
+
+# VALIDA: DESCRICAO NULA
+POST http://0.0.0.0:9999/clientes/{{id}}/transacoes
+Content-Type: application/json
+
+{"valor": 1, "tipo": "c", "descricao": null}
+###
+

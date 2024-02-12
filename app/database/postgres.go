@@ -36,11 +36,6 @@ func ConectarAoPostgreSQL() {
 		panic(err)
 	}
 
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(0)
-	db.SetConnMaxIdleTime(0)
-
 	dbCnx = db
 	log.Println("Banco de dados conectado com sucesso")
 }
