@@ -19,5 +19,9 @@ composer-stop:
 
 composer-restart: composer-stop composer-start
 
-rodar-carga:
+rodar-carga: composer-stop composer-start
 	@./test/executar-teste-local.sh
+
+resetar-db:
+	@docker-compose  -f "docker-composer.yaml" down database
+	@docker-compose  -f "docker-composer.yaml" up -d --build database --force-recreate --remove-orphans

@@ -1,37 +1,35 @@
 package routes
 
 import (
+	"context"
 	"net/http"
-	"rinha-backend-2024-q1/database"
 	"rinha-backend-2024-q1/helpers"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-const ROTA_EXTRATO = "GET /clientes/{id}/extrato"
+const ROTA_EXTRATO = "/clientes/:id/extrato"
 
-func Extrato(w http.ResponseWriter, r *http.Request) {
+func (r RotaBase) ConsultarExtrato(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.Atoi(idStr)
 
-	id := helpers.PegaIdDoPathValue(r)
-
-	idValido := helpers.VerificaSeIdEstaEntreUmOuCinco(id)
-	if !idValido {
-		w.WriteHeader(http.StatusNotFound)
+	if idValido := helpers.VerificaSeIdMenorIgualCinco(id); !idValido {
+		c.JSON(http.StatusNotFound, nil)
 		return
 	}
 
-	db := database.PegarConexao()
+	ctx, cancel := context.WithTimeout(c, 10*time.Second)
+	defer cancel()
 
-	rows, err := db.Query(database.Q_EXTRATO_CLIENTE, id)
+	extrato, err := r.repo.ObterExtrato(ctx, id)
 	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		c.JSON(http.StatusUnprocessableEntity, nil)
 		return
 	}
-	defer rows.Close()
 
-	var dbJson string
-	for rows.Next() {
-		err = rows.Scan(&dbJson)
-	}
+	c.String(http.StatusOK, extrato)
 
-	w.Write([]byte(dbJson))
-	return
 }

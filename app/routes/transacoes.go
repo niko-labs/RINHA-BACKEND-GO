@@ -1,146 +1,47 @@
 package routes
 
 import (
-	"database/sql"
-	"errors"
-	"io"
+	"log"
 	"net/http"
-	"rinha-backend-2024-q1/database"
 	"rinha-backend-2024-q1/helpers"
 	"rinha-backend-2024-q1/types"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
-const ROTA_TRANSACOES = "POST /clientes/{id}/transacoes"
+const ROTA_TRANSACOES = "/clientes/:id/transacoes"
 
-func Transacoes(w http.ResponseWriter, r *http.Request) {
+func (r RotaBase) RealizarTransacao(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.Atoi(idStr)
 
-	id := helpers.PegaIdDoPathValue(r)
-
-	idValido := helpers.VerificaSeIdEstaEntreUmOuCinco(id)
-	if !idValido {
-		w.WriteHeader(http.StatusNotFound)
+	if idValido := helpers.VerificaSeIdMenorIgualCinco(id); !idValido {
+		c.JSON(http.StatusNotFound, nil)
 		return
 	}
 
-	body, _ := io.ReadAll(r.Body)
-
-	dadosTransacao := &types.TransacaoInput{}
-	err := helpers.Json.Unmarshal(body, dadosTransacao)
-	if err != nil {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+	transacao := &types.TransacaoInput{}
+	if err := c.ShouldBindJSON(transacao); err != nil {
+		log.Println("ERR:001 - ", err)
+		c.JSON(http.StatusUnprocessableEntity, nil)
 		return
 	}
 
-	if dadosTransacao.Tipo != "c" && dadosTransacao.Tipo != "d" {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+	if !transacao.Validar() {
+		c.JSON(http.StatusUnprocessableEntity, nil)
 		return
 	}
 
-	if len(dadosTransacao.Descricao) == 0 || len(dadosTransacao.Descricao) > 10 || dadosTransacao.Descricao == "" {
-		w.WriteHeader(http.StatusUnprocessableEntity)
+	saldo, limite, err := r.repo.ExecutarTransacao(c, id, transacao.Valor, transacao.Tipo, transacao.Descricao)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, nil)
 		return
 	}
 
-	db := database.PegarConexao()
+	c.JSON(http.StatusOK, types.TransacaoOutput{
+		Saldo:  *saldo,
+		Limite: *limite,
+	})
 
-	cliente, err := buscaInfoDoCliente(db, id)
-
-	if dadosTransacao.Tipo == types.DEBITO {
-		saldo, err := debitar(db, id, cliente, dadosTransacao)
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			return
-		}
-
-		response := types.TransacaoOutput{Limite: cliente.Limite, Saldo: *saldo}
-		_json, _ := helpers.Json.Marshal(response)
-		w.Write(_json)
-		return
-	}
-	if dadosTransacao.Tipo == types.CREDITO {
-		saldo, err := creditar(db, id, cliente, dadosTransacao)
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-		}
-		response := types.TransacaoOutput{Limite: cliente.Limite, Saldo: *saldo}
-		_json, _ := helpers.Json.Marshal(response)
-		w.Write(_json)
-		return
-	}
-
-}
-
-func debitar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
-
-	// Atualiza o saldo do cliente
-	cliente.Saldo -= transacao.Valor
-
-	// Verifica se o saldo do cliente é menor que o limite
-	if cliente.Saldo < -cliente.Limite {
-		return nil, errors.New("Saldo insuficiente")
-	}
-
-	// Inicia Transação
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, err
-	}
-
-	// Executa STMT_UPDATE e STMT_INSERT
-	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(database.TD_STMT_INSERT, id, transacao.Valor, transacao.Descricao)
-
-	// Commita a transação
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	// Retorna o saldo do cliente
-	return &cliente.Saldo, nil
-}
-
-func creditar(db *sql.DB, id int8, cliente *types.TbCliente, transacao *types.TransacaoInput) (saldo *int64, err error) {
-
-	// Atualiza o saldo do cliente
-	cliente.Saldo += transacao.Valor
-
-	// Inicia Transação
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, err
-	}
-
-	// Executa STMT_UPDATE e STMT_INSERT
-	tx.Exec(database.CD_STMT_UPDATE, cliente.Saldo, id)
-	tx.Exec(database.TC_STMT_INSERT, id, transacao.Valor, transacao.Descricao)
-
-	// Commita a transação
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	return &cliente.Saldo, nil
-}
-
-func buscaInfoDoCliente(db *sql.DB, id int8) (*types.TbCliente, error) {
-
-	rows, err := db.Query(database.Q_CLIENTE, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var cliente types.TbCliente
-	for rows.Next() {
-		err = rows.Scan(&cliente.Id, &cliente.Limite, &cliente.Saldo)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return &cliente, nil
 }

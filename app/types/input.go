@@ -1,9 +1,9 @@
 package types
 
 type TransacaoInput struct {
-	Valor     int64         `json:"valor"`
-	Tipo      TipoTransacao `json:"tipo"`
-	Descricao string        `json:"descricao"`
+	Valor     int64  `json:"valor"`
+	Tipo      string `json:"tipo"`
+	Descricao string `json:"descricao"`
 }
 
 func (t *TransacaoInput) Validar() bool {

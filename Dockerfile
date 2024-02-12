@@ -1,16 +1,36 @@
-#####################
-#      builder      #
-#####################
+######################
+#    dependencies    #
+######################
 
-FROM golang:1.22.0-alpine AS builder
+FROM golang:1.22.0-alpine AS dependencies
 
 RUN apk update && apk add --no-cache gcc libc-dev make
 
 # Set the Current Working Directory inside the container
-WORKDIR /_builder
+WORKDIR /.dependencies
 
-# Copy all the source code to the Working Directory
+# Copy Only the go mod and sum files to take advantage of caching
+COPY ./app/go.mod .
+COPY ./app/go.sum .
+
+# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+
+#####################
+#      builder      #
+#####################
+
+# Build the Go from dependencies
+FROM dependencies AS builder
+WORKDIR /.builder
+
+# Copy discarding the go.mod and go.sum files
 COPY ./app .
+
+# Build the Go app
+ENV CGO_ENABLED=0
+ENV GIN_MODE=release
 
 # Build the Go app
 RUN make build-server
@@ -21,14 +41,14 @@ RUN make build-server
 #       FINAL       #
 #####################
 
-FROM alpine:3.12.0 AS final
+FROM alpine:latest AS final
 
 # Set the Current Working Directory inside the container
-WORKDIR /_app
+WORKDIR /.app
 RUN apk update && apk add --no-cache curl
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder /_builder/bin/server /_app/_server
+COPY --from=builder /.builder/bin/server /.app/server.so
 
 # Command to run the executable
-CMD ["/_app/_server"]
+CMD ["/.app/server.so"]

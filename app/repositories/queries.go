@@ -1,7 +1,8 @@
-package database
+package repositories
 
 const (
 	// TRANSACOES
+	T_INSERT_INFO  = "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, $3, $4);"
 	TD_STMT_INSERT = "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, 'd', $3);"
 	TC_STMT_INSERT = "INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES ($1, $2, 'c', $3);"
 
@@ -12,7 +13,7 @@ const (
 	Q_EXTRATO = "SELECT valor, tipo, descricao, realizada_em FROM transacoes WHERE cliente_id = $1 ORDER BY realizada_em DESC LIMIT 10;"
 
 	// CLIENTE - CONSULTA
-	Q_CLIENTE = "SELECT id, limite, saldo FROM clientes WHERE id = $1 LIMIT 1"
+	Q_CLIENTE_INFOS = "SELECT limite, saldo FROM clientes WHERE id = $1 LIMIT 1"
 
 	// QUERY - GERA EXTRATO DE CLIENTE DIRETO PELO BANCO
 	Q_EXTRATO_CLIENTE = `

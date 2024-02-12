@@ -1,20 +1,18 @@
 package database
 
 import (
-	"database/sql"
+	"context"
+	"rinha-backend-2024-q1/helpers"
 
 	"log"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 
 	"os"
 )
 
-var (
-	dbCnx *sql.DB
-)
-
-func ConectarAoPostgreSQL() {
+func ConectarBancoDados() *pgxpool.Pool {
 
 	DB_HOST := os.Getenv("DB_HOST")
 	DB_PORT := os.Getenv("DB_PORT")
@@ -22,27 +20,15 @@ func ConectarAoPostgreSQL() {
 	DB_PASS := os.Getenv("DB_PASS")
 	DB_NAME := os.Getenv("DB_NAME")
 
-	dsn := "host=" + DB_HOST + " port=" + DB_PORT + " user=" + DB_USER + " password=" + DB_PASS + " dbname=" + DB_NAME + " sslmode=disable"
+	DATABASE_URL := "postgres://" + DB_USER + ":" + DB_PASS + "@" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + "?sslmode=disable"
+	log.Println(DATABASE_URL)
 
-	db, err := sql.Open("postgres", dsn)
-	if err != nil {
-		log.Println("Error on open database connection")
-		panic(err)
-	}
+	db, err := pgxpool.New(context.Background(), DATABASE_URL)
+	helpers.VerificaErro(err)
 
-	err = db.Ping()
-	if err != nil {
-		log.Println("Erro ao pingar o banco de dados")
-		panic(err)
-	}
+	err = db.Ping(context.Background())
+	helpers.VerificaErroComMsgLog(err, "Erro ao conectar ao banco de dados")
 
-	dbCnx = db
 	log.Println("Banco de dados conectado com sucesso")
-}
-
-func PegarConexao() *sql.DB {
-	if dbCnx == nil {
-		panic("Conexão com o banco de dados não configurada")
-	}
-	return dbCnx
+	return db
 }

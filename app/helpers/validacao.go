@@ -15,6 +15,6 @@ func TransformarEmCentavos(valor int64) int64 {
 	return int64(valor * 100)
 }
 
-func VerificaSeIdEstaEntreUmOuCinco(id int8) bool {
-	return id >= 1 && id <= 5
+func VerificaSeIdMenorIgualCinco[T int|int8](id T) bool {
+	return id <= 5
 }
