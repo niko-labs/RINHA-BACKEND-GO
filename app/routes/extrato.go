@@ -31,5 +31,4 @@ func (r RotaBase) ConsultarExtrato(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, extrato)
-
 }

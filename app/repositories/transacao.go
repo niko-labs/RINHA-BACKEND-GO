@@ -3,8 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
-
-	"github.com/jackc/pgx/v5"
+	"log"
 )
 
 func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor int64, tipo string, descricao string) (*int64, *int64, error) {
@@ -14,29 +13,33 @@ func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor i
 	}
 	defer tx.Rollback(ctx)
 
-	var limite, saldo int64
-
-	if err = tx.QueryRow(ctx, Q_CLIENTE_INFOS, id).Scan(&limite, &saldo); err != nil {
+	var limiteBanco, saldoBanco int64
+	if err = tx.QueryRow(ctx, CLIENTE_INFO, id).Scan(&saldoBanco, &limiteBanco); err != nil {
 		return nil, nil, err
 	}
 
-	var saldoAtualizado int64
-	if tipo == "d" {
-		saldoAtualizado = saldo - valor
+	// if err = tx.Commit(ctx); err != nil {
+	// 	return nil, nil, err
+	// }
+
+	// tx, err = r.db.Begin(ctx)
+
+	var UPDATE_SALDO string
+	// 5 - 15 > 3 =
+	if tipo == "d" && ((saldoBanco - valor) < -limiteBanco) {
+		log.Println("Saldo insuficiente")
+		return nil, nil, errors.New("Saldo insuficiente")
+	}
+	if tipo == "c" {
+		UPDATE_SALDO = UPDATE_SALDO_C
 	} else {
-		saldoAtualizado = saldo + valor
+		UPDATE_SALDO = UPDATE_SALDO_D
 	}
 
-	if saldoAtualizado < limite*-1 {
-		return nil, nil, errors.New("Saldo Insuficiente")
+	if _, err := tx.Exec(ctx, T_INSERT_INFO, id, valor, tipo, descricao); err != nil {
+		return nil, nil, err
 	}
-
-	batch := &pgx.Batch{}
-	batch.Queue(CD_STMT_UPDATE, id, saldoAtualizado)
-	batch.Queue(T_INSERT_INFO, id, valor, tipo, descricao)
-
-	br := tx.SendBatch(ctx, batch)
-	if err = br.Close(); err != nil {
+	if _, err = tx.Exec(ctx, UPDATE_SALDO, id, valor); err != nil {
 		return nil, nil, err
 	}
 
@@ -44,6 +47,11 @@ func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor i
 		return nil, nil, err
 	}
 
-	return &limite, &saldoAtualizado, nil
+	var saldoFinal, limiteFinal int64
+	if err = r.db.QueryRow(ctx, CLIENTE_INFO, id).Scan(&saldoFinal, &limiteFinal); err != nil {
+		return nil, nil, err
+	}
+
+	return &saldoFinal, &limiteFinal, nil
 
 }
