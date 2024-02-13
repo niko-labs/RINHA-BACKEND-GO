@@ -8,6 +8,13 @@ GET http://0.0.0.0:9999/ping
 GET http://localhost:9999/clientes/{{id}}/extrato
 ###
 
+# VALIDA: OK - 200
+POST http://0.0.0.0:9999/clientes/{{id}}/transacoes
+Content-Type: application/json
+
+{"valor": 123, "tipo": "d", "descricao": "VR:123"}
+###
+
 # VALIDA: FLOAT GERA ERRO
 POST http://0.0.0.0:9999/clientes/{{id}}/transacoes
 Content-Type: application/json

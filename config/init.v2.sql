@@ -13,10 +13,10 @@ BEGIN
 	INSERT INTO
 	    clientes (nome, limite, saldo)
 	VALUES ('Asuka', 1000 * 100, 0),
-	    ('Rin', 5000 * 100, 0),
-	    ('Shinji', 800 * 100, 0),
-	    ('Fern', 10000 * 100, 0),
-	    ('Frienren', 100000 * 100, 0);
+	    ('Rin', 800 * 100, 0),
+	    ('Shinji', 10000 * 100, 0),
+	    ('Fern', 100000 * 100, 0),
+	    ('Frienren', 5000 * 100, 0);
 END;
 $$; 
 
