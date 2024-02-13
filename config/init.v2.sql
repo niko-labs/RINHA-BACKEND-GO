@@ -13,12 +13,28 @@ BEGIN
 	INSERT INTO
 	    clientes (nome, limite, saldo)
 	VALUES ('Asuka', 1000 * 100, 0),
-	    ('Rin', 5000 * 100, 0),
-	    ('Shinji', 800 * 100, 0),
-	    ('Fern', 10000 * 100, 0),
-	    ('Frienren', 100000 * 100, 0);
+	    ('Rin', 800 * 100, 0),
+	    ('Shinji', 10000 * 100, 0),
+	    ('Fern', 100000 * 100, 0),
+	    ('Frienren', 5000 * 100, 0);
 END;
 $$; 
+
+-- Map (
+--     "id" -> 1, "limite" -> 1000 * 100
+-- ),
+-- Map (
+--     "id" -> 2, "limite" -> 800 * 100
+-- ),
+-- Map (
+--     "id" -> 3, "limite" -> 10000 * 100
+-- ),
+-- Map (
+--     "id" -> 4, "limite" -> 100000 * 100
+-- ),
+-- Map (
+--     "id" -> 5, "limite" -> 5000 * 100
+-- ),
 
 CREATE INDEX idx_compound_cliente_id_realizado_em ON transacoes (cliente_id, realizada_em);
 
