@@ -9,7 +9,7 @@ const (
 
 	// CLIENTE - CONSULTA
 	CLIENTE_INFO = "SELECT saldos.valor, clientes.limite FROM saldos JOIN clientes ON clientes.id = saldos.cliente_id WHERE saldos.cliente_id = $1 FOR UPDATE"
-	
+
 	// QUERY - GERA EXTRATO DE CLIENTE DIRETO PELO BANCO
 	Q_EXTRATO_CLIENTE = `
 
@@ -57,5 +57,25 @@ const (
 		FROM
 			ultimas_transacoes_cte;
   
+	`
+
+	CTE_CDI = `
+	WITH
+		cte_atualizar_saldo AS (
+			UPDATE saldos AS sd
+				SET valor = CASE  
+						WHEN $3='c' THEN (valor + $2)
+						WHEN $3='d' AND (valor - $2) < -cl.limite THEN (valor - $2) 
+						ELSE valor
+					END
+				FROM clientes cl
+				WHERE sd.cliente_id = cl.id AND cl.id = $1
+				RETURNING sd.valor, cl.limite
+		),
+		cte_inserir_transacao AS (
+			INSERT INTO transacoes (cliente_id, valor, tipo, descricao)
+			VALUES ($1, $2, $3, $4)
+		)
+	SELECT * FROM cte_atualizar_saldo FOR UPDATE;
 	`
 )
