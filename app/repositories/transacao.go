@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -20,6 +21,11 @@ func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor i
 		return nil, nil, err
 	}
 
+	if tipo == "d" && ((saldo - valor) < -limite) {
+		log.Println("Saldo insuficiente")
+		return nil, nil, errors.New("Saldo insuficiente")
+	}
+
 	var saldoAtualizado int64
 	if tipo == "d" {
 		saldoAtualizado = saldo - valor
@@ -27,13 +33,9 @@ func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor i
 		saldoAtualizado = saldo + valor
 	}
 
-	if saldoAtualizado < limite*-1 {
-		return nil, nil, errors.New("Saldo Insuficiente")
-	}
-
 	batch := &pgx.Batch{}
-	batch.Queue(CD_STMT_UPDATE, id, saldoAtualizado)
 	batch.Queue(T_INSERT_INFO, id, valor, tipo, descricao)
+	batch.Queue(CD_STMT_UPDATE, id, saldoAtualizado)
 
 	br := tx.SendBatch(ctx, batch)
 	if err = br.Close(); err != nil {
