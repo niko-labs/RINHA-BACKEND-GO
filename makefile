@@ -7,7 +7,7 @@ build-and-submit:
 	@docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(IMAGE_NAME):latest-arm . --push
 
 build-run:
-	@cd app && go build -o bin/server -ldflags="-s -w" ./main.go
+	@cd app && go build -o bin/server -ldflags="-s -w" ./cmd/main.go
 	@cd app && ./bin/server
 
 

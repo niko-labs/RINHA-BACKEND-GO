@@ -33,7 +33,7 @@ func (r RotaBase) RealizarTransacao(c *gin.Context) {
 		return
 	}
 
-	saldo, limite, err := r.repo.ExecutarTransacao(c, id, transacao.Valor, transacao.Tipo, transacao.Descricao)
+	limite, saldo, err := r.repo.ExecutarTransacao(c, id, transacao.Valor, transacao.Tipo, transacao.Descricao)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, nil)
 		return

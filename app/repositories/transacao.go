@@ -32,7 +32,7 @@ func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor i
 	}
 
 	batch := &pgx.Batch{}
-	batch.Queue(CD_STMT_UPDATE, saldoAtualizado, id)
+	batch.Queue(CD_STMT_UPDATE, id, saldoAtualizado)
 	batch.Queue(T_INSERT_INFO, id, valor, tipo, descricao)
 
 	br := tx.SendBatch(ctx, batch)
