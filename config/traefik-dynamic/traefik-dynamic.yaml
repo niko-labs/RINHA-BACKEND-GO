@@ -1,0 +1,14 @@
+http:
+  services:
+    apis:
+      loadBalancer:
+        servers:
+          - url: "http://api01:9999/"
+          - url: "http://api02:9999/"
+
+  routers:
+    to-rinha:
+      entryPoints:
+        - web
+      rule: "Host(`localhost`)"
+      service: apis

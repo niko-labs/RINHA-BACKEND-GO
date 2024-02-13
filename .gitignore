@@ -1,2 +1,4 @@
 app/.DS_Store
 app/bin/server
+test/request.http
+test/load-test/*
