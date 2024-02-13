@@ -3,8 +3,7 @@ DOCKER_USER = "nicolasmmb"
 
 
 build-and-submit:
-	@docker buildx build --platform linux/amd64 -t $(DOCKER_USER)/$(IMAGE_NAME):latest . --push
-	@docker buildx build --platform linux/arm64 -t $(DOCKER_USER)/$(IMAGE_NAME):latest-arm . --push
+	@docker buildx build --no-cache --platform linux/amd64 -t $(DOCKER_USER)/$(IMAGE_NAME):latest . --push
 
 build-run:
 	@cd app && go build -o bin/server -ldflags="-s -w" ./cmd/main.go
