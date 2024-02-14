@@ -3,9 +3,17 @@ package repositories
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/jackc/pgx/v5"
+)
+
+const (
+	KDEBITO  = "d"
+	KCREDITO = "c"
+)
+
+var (
+	ERR_SALDO_INSUFICIENTE = errors.New("Saldo insuficiente")
 )
 
 func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor int64, tipo string, descricao string) (*int64, *int64, error) {
@@ -21,13 +29,12 @@ func (r *RepositorioBase) ExecutarTransacao(ctx context.Context, id int, valor i
 		return nil, nil, err
 	}
 
-	if tipo == "d" && ((saldo - valor) < -limite) {
-		log.Println("Saldo insuficiente")
-		return nil, nil, errors.New("Saldo insuficiente")
+	if tipo == KDEBITO && ((saldo - valor) < -limite) {
+		return nil, nil, ERR_SALDO_INSUFICIENTE
 	}
 
 	var saldoAtualizado int64
-	if tipo == "d" {
+	if tipo == KDEBITO {
 		saldoAtualizado = saldo - valor
 	} else {
 		saldoAtualizado = saldo + valor

@@ -14,6 +14,8 @@ import (
 func init() {
 	helpers.PrintArt()
 	helpers.LoadEnv()
+	helpers.PrintServerMode()
+
 }
 
 func main() {

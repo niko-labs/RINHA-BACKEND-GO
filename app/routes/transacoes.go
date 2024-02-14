@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"log"
 	"net/http"
 	"rinha-backend-2024-q1/helpers"
 	"rinha-backend-2024-q1/types"
@@ -23,7 +22,6 @@ func (r RotaBase) RealizarTransacao(c *gin.Context) {
 
 	transacao := &types.TransacaoInput{}
 	if err := c.ShouldBindJSON(transacao); err != nil {
-		log.Println("ERR:001 - ", err)
 		c.JSON(http.StatusUnprocessableEntity, nil)
 		return
 	}

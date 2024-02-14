@@ -30,7 +30,6 @@ COPY ./app .
 
 # Build the Go app
 ENV CGO_ENABLED=0
-ENV GIN_MODE=release
 
 # Build the Go app
 RUN make build-server
@@ -46,6 +45,7 @@ FROM alpine:latest AS final
 # Set the Current Working Directory inside the container
 WORKDIR /.app
 RUN apk update && apk add --no-cache curl
+ENV GIN_MODE=release
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /.builder/bin/server /.app/server.so
