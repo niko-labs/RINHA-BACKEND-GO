@@ -13,7 +13,11 @@ const (
 	Q_EXTRATO = "SELECT valor, tipo, descricao, realizada_em FROM transacoes WHERE cliente_id = $1 ORDER BY realizada_em DESC LIMIT 10;"
 
 	// CLIENTE - CONSULTA
-	Q_CLIENTE_INFOS = "SELECT limite, saldo FROM clientes WHERE id = $1 LIMIT 1 FOR UPDATE;"
+	Q_CLIENTE_INFOS       = "SELECT limite, saldo FROM clientes WHERE id = $1 LIMIT 1 FOR UPDATE;"
+	Q_CLIENTE_INFOS_CACHE = "SELECT saldo FROM clientes WHERE id = $1 LIMIT 1 FOR UPDATE;"
+
+	// UPDATE CRED-DEB
+	Q_UPDATE_CRED_DEB = "UPDATE clientes SET saldo = CASE WHEN $1 = 'c' THEN saldo + $2 ELSE saldo - $2 END WHERE id = $3 RETURNING saldo;"
 
 	// QUERY - GERA EXTRATO DE CLIENTE DIRETO PELO BANCO
 	Q_EXTRATO_CLIENTE = `

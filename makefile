@@ -19,7 +19,7 @@ composer-stop:
 composer-restart: composer-stop composer-start
 
 rodar-carga: composer-stop composer-start
-	@./test/executar-teste-local.sh
+	@cd ../rinha-de-backend-2024-q1 && ./executar-teste-local.sh
 
 resetar-db:
 	@docker-compose  -f "docker-compose.yml" down db

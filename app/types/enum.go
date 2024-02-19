@@ -5,6 +5,6 @@ package types
 type TipoTransacao string
 
 const (
-	DEBITO  TipoTransacao = "d"
-	CREDITO TipoTransacao = "c"
+	DEBITO  string = "d"
+	CREDITO string = "c"
 )

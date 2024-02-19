@@ -16,7 +16,7 @@ func (r RotaBase) ConsultarExtrato(c *gin.Context) {
 	idStr := c.Param("id")
 	id, _ := strconv.Atoi(idStr)
 
-	if idValido := helpers.VerificaSeIdMenorIgualCinco(id); !idValido {
+	if helpers.VerificaSeIdMaiorQueCinco(id) {
 		c.JSON(http.StatusNotFound, nil)
 		return
 	}

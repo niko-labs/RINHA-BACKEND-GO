@@ -7,8 +7,13 @@ import (
 	"rinha-backend-2024-q1/helpers"
 	"rinha-backend-2024-q1/repositories"
 	"rinha-backend-2024-q1/routes"
+	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	MAX_MEMORY = 64 * 1024 * 1024
 )
 
 func init() {
@@ -19,6 +24,12 @@ func init() {
 }
 
 func main() {
+	debug.SetGCPercent(300)
+	debug.SetMaxStack(MAX_MEMORY)
+
+	// f, _ := os.Create("trace.out")
+	// trace.Start(f)
+	// defer trace.Stop()
 
 	db := database.ConectarBancoDados()
 	defer db.Close()
